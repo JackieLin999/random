@@ -2,59 +2,64 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdint.h>
+#include <string.h>
 
-// Use a large array size (e.g., 64MB) to ensure we are working effectively
-#define ARRAY_SIZE (64 * 1024 * 1024)
+#define ARRAY_SIZE_BYTES (64 * 1024 * 1024) // 64 MB
+#define NUM_ACCESSES 10000000               // Number of hops to measure
 
 int main() {
-    // 1. Allocate a large chunk of memory
-    // Using int8_t (bytes) for precise stride control
-    int8_t *array = (int8_t*)malloc(ARRAY_SIZE * sizeof(int8_t));
-    if (!array) {
-        perror("Malloc failed");
-        return 1;
-    }
+    // Allocate memory
+    char *memory = (char*)malloc(ARRAY_SIZE_BYTES);
+    if (!memory) return 1;
 
-    // Initialize to prevent page faults during the timing loop
-    for (int i = 0; i < ARRAY_SIZE; i++) {
-        array[i] = 1;
-    }
+    // Fill with junk to force physical allocation
+    memset(memory, 1, ARRAY_SIZE_BYTES);
 
-    struct timespec start, end;
-    long long steps;
-    int dummy = 0; // To prevent compiler optimization
-
+    // We use void** to treat the memory as a chain of pointers
+    void **head;
+    
     printf("Stride(B)\tAvg_Time(ns)\n");
     printf("------------------------\n");
 
-    // 2. Loop through different strides (powers of 2)
-    // From 1 byte up to 512 bytes
-    for (int stride = 1; stride <= 512; stride *= 2) {
+    // Test strides from 16 up to 512
+    for (int stride = 16; stride <= 512; stride *= 2) {
         
-        steps = 0;
+        // 1. SETUP THE POINTER CHAIN
+        // We manually link memory[i] to point to memory[i+stride]
+        for (int i = 0; i < ARRAY_SIZE_BYTES - stride; i += stride) {
+            // The value at 'memory + i' is the address of 'memory + i + stride'
+            *(void**)(&memory[i]) = (void*)(&memory[i + stride]);
+        }
+        // Close the loop (circular) so we don't crash
+        *(void**)(&memory[ARRAY_SIZE_BYTES - stride]) = (void*)(&memory[0]);
+
+        head = (void**)memory; // Start at beginning
         
-        // Start Timer
+        // Warm up cache slightly
+        void **p = head;
+        for(int k=0; k<1000; k++) p = (void**)*p;
+
+        // 2. MEASURE LATENCY
+        struct timespec start, end;
         clock_gettime(CLOCK_MONOTONIC, &start);
 
-        // THE CRITICAL LOOP
-        // We iterate the array with the current 'stride'
-        // We mask with (ARRAY_SIZE - 1) to ensure we wrap around if needed (requires power of 2 size),
-        // or just stop before the end. Here, standard loop is safer for clarity:
-        for (int i = 0; i < ARRAY_SIZE; i += stride) {
-            dummy += array[i]; // Read access
-            steps++;
+        // CRITICAL LOOP: Pointer Chasing
+        // The CPU cannot predict 'p' until it reads '*p'.
+        // This forces serialization and exposes true latency.
+        p = head;
+        for (int k = 0; k < NUM_ACCESSES; k++) {
+            p = (void**)*p; 
         }
 
-        // Stop Timer
         clock_gettime(CLOCK_MONOTONIC, &end);
 
-        // Calculate time diff in nanoseconds
-        double time_taken = (end.tv_sec - start.tv_sec) * 1e9 + 
-                            (end.tv_nsec - start.tv_nsec);
-        
-        printf("%d\t\t%.4f\n", stride, time_taken / steps);
+        // Calculate
+        double time_ns = ((end.tv_sec - start.tv_sec) * 1e9 + 
+                          (end.tv_nsec - start.tv_nsec)) / NUM_ACCESSES;
+
+        printf("%d\t\t%.4f\n", stride, time_ns);
     }
 
-    free(array);
+    free(memory);
     return 0;
 }
