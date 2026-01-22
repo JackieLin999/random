@@ -1,35 +1,60 @@
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
-#include <x86intrin.h>
-#include <unistd.h>
+#include <time.h>
+#include <stdint.h>
 
-#define STRIDE 4096   // one page
-#define MAX_PAGES 4096
-#define REPEAT 1000
+// Use a large array size (e.g., 64MB) to ensure we are working effectively
+#define ARRAY_SIZE (64 * 1024 * 1024)
 
 int main() {
-    int page_size = sysconf(_SC_PAGESIZE);
-    printf("Page size = %d bytes\n", page_size);
-
-    char *buf = aligned_alloc(page_size, MAX_PAGES * page_size);
-
-    for (int pages = 1; pages <= 1024; pages *= 2) {
-        volatile char sum = 0;
-        uint64_t start = __rdtsc();
-
-        for (int r = 0; r < REPEAT; r++) {
-            for (int i = 0; i < pages; i++) {
-                sum += buf[i * STRIDE];
-            }
-        }
-
-        uint64_t end = __rdtsc();
-        printf("Pages: %4d | cycles/access: %.2f\n",
-               pages,
-               (double)(end - start) / (pages * REPEAT));
+    // 1. Allocate a large chunk of memory
+    // Using int8_t (bytes) for precise stride control
+    int8_t *array = (int8_t*)malloc(ARRAY_SIZE * sizeof(int8_t));
+    if (!array) {
+        perror("Malloc failed");
+        return 1;
     }
 
-    free(buf);
+    // Initialize to prevent page faults during the timing loop
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        array[i] = 1;
+    }
+
+    struct timespec start, end;
+    long long steps;
+    int dummy = 0; // To prevent compiler optimization
+
+    printf("Stride(B)\tAvg_Time(ns)\n");
+    printf("------------------------\n");
+
+    // 2. Loop through different strides (powers of 2)
+    // From 1 byte up to 512 bytes
+    for (int stride = 1; stride <= 512; stride *= 2) {
+        
+        steps = 0;
+        
+        // Start Timer
+        clock_gettime(CLOCK_MONOTONIC, &start);
+
+        // THE CRITICAL LOOP
+        // We iterate the array with the current 'stride'
+        // We mask with (ARRAY_SIZE - 1) to ensure we wrap around if needed (requires power of 2 size),
+        // or just stop before the end. Here, standard loop is safer for clarity:
+        for (int i = 0; i < ARRAY_SIZE; i += stride) {
+            dummy += array[i]; // Read access
+            steps++;
+        }
+
+        // Stop Timer
+        clock_gettime(CLOCK_MONOTONIC, &end);
+
+        // Calculate time diff in nanoseconds
+        double time_taken = (end.tv_sec - start.tv_sec) * 1e9 + 
+                            (end.tv_nsec - start.tv_nsec);
+        
+        printf("%d\t\t%.4f\n", stride, time_taken / steps);
+    }
+
+    free(array);
     return 0;
 }
