@@ -1,0 +1,9 @@
+Probing Page Size (Fixed Access Count, Variable Stride)
+Stride(B)	Avg_Time(ns)
+------------------------
+512		40.0726
+1024		18.4866
+2048		34.2790
+4096		57.2184
+8192		53.9546
+16384		124.8807
