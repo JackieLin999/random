@@ -9,4 +9,4 @@
 !*.h
 !*.md
 !.gitignore
-!.txt
+!*.txt
