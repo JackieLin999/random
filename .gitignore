@@ -1,0 +1,11 @@
+# Ignore files with no extension
+*
+
+# Allow directories
+!*/
+
+# Allow source and config files (add as needed)
+!*.c
+!*.h
+!*.md
+!.gitignore
