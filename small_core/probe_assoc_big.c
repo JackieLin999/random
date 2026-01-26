@@ -27,7 +27,7 @@ void pin_to_core(int core_id) {
 
 int main(int argc, char *argv[]) {
     // 1. Read the Stride from the command line
-    pin_to_core(1);
+    pin_to_core(16);
     if (argc != 2) {
         printf("Usage: ./probe_assoc <stride_in_bytes>\n");
         return 1;

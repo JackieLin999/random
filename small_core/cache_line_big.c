@@ -23,7 +23,7 @@ void pin_to_core(int core_id) {
 }
 
 int main() {
-    pin_to_core(1); // Target E-Core
+    pin_to_core(0); // Target E-Core
 
     char *memory = (char*)malloc(ARRAY_SIZE);
     memset(memory, 1, ARRAY_SIZE);
