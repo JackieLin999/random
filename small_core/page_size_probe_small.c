@@ -26,7 +26,7 @@ void pin_to_core(int core_id) {
 }
 
 int main() {
-    pin_to_core(16);
+    pin_to_core(1);
     // Allocate a huge block of memory
     char *memory = mmap(NULL, MAX_MEM, PROT_READ | PROT_WRITE, 
                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);

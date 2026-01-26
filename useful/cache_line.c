@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define ARRAY_SIZE_BYTES (64 * 1024 * 1024) // 64 MB
-#define NUM_ACCESSES 10000000               // Number of hops to measure
+#define NUM_ACCESSES 10000000 // Number of hops to measure
 
 int main() {
     // Allocate memory
