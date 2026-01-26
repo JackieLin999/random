@@ -23,7 +23,9 @@ void pin_to_core(int core_id) {
 }
 
 int main() {
-    pin_to_core(16);
+    long num_cores = sysconf(_SC_NPROCESSORS_ONLN);
+    int target_core = num_cores - 1;
+    pin_to_core(target_core);
     // Allocate enough memory for the max test size
     size_t total_bytes = (size_t)MAX_PAGES * PAGE_SIZE;
     char *memory = (char*)malloc(total_bytes);
