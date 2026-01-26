@@ -96,7 +96,7 @@ void pin_to_core(int core_id) {
 
 int main() {
     srand(time(NULL)); // Seed the random number generator
-    pin_to_core(1);
+    pin_to_core(0);
     
     printf("Size(KB), Time(ns)\n");
 

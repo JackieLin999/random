@@ -26,7 +26,7 @@ void pin_to_core(int core_id) {
 }
 
 int main() {
-    pin_to_core(1);
+    pin_to_core(0);
     printf("I-Cache Probe (Code Size vs Latency)\n");
     printf("Code_Size(KB)\tAvg_Time(ns)\n");
     printf("------------------------------------\n");

@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+#include <sched.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -8,7 +10,20 @@
 #define MAX_PAGES 3000 // Test up to 3000 pages (approx 12MB, fits in L3)
 #define ACCESSES 1000000
 
+void pin_to_core(int core_id) {
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(core_id, &cpuset);
+
+    if (sched_setaffinity(0, sizeof(cpu_set_t), &cpuset) != 0) {
+        perror("sched_setaffinity");
+        exit(1);
+    }
+    printf("Successfully pinned to Core %d\n", core_id);
+}
+
 int main() {
+    pin_to_core(0);
     // Allocate enough memory for the max test size
     size_t total_bytes = (size_t)MAX_PAGES * PAGE_SIZE;
     char *memory = (char*)malloc(total_bytes);
