@@ -6,10 +6,7 @@
 #include <sys/mman.h>
 
 #define NUM_ACCESSES 10000 
-// We need a large enough buffer to accommodate the largest stride * accesses
-// 10,000 accesses * 32KB stride = ~320 MB. 
-// We use mmap to ensure we get a clean chunk of memory.
-#define MAX_MEM (size_t)(NUM_ACCESSES * 32768) 
+#define MAX_MEM (size_t)(NUM_ACCESSES * 32768) // largest possible buffer
 
 int main() {
     // Allocate a huge block of memory
@@ -21,8 +18,7 @@ int main() {
         return 1;
     }
 
-    // Warmup: Write to every page to ensure physical memory is allocated
-    // We assume 4KB is the minimum possible page size for the warmup loop
+    // touch every byte
     for (size_t i = 0; i < MAX_MEM; i += 4096) {
         memory[i] = 1;
     }
@@ -53,13 +49,12 @@ int main() {
             *current = next;
         }
 
-        // --- Measure ---
         void **p = (void**)(&memory[0]);
         struct timespec start, end;
 
         clock_gettime(CLOCK_MONOTONIC, &start);
         
-        // This loop executes exactly NUM_ACCESSES times
+        // this loop executes exactly NUM_ACCESSES times
         for (int k = 0; k < NUM_ACCESSES; k++) {
             p = (void**)*p;
         }

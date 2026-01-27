@@ -7,8 +7,8 @@
 #include <string.h>
 #include <unistd.h>
 
-// Instructions to fill: 0x90 is NOP (No Operation) on x86
-// 0xC3 is RET (Return)
+// throw empty instructions
+// NOP is no operations
 #define NOP 0x90
 #define RET 0xC3
 
@@ -23,8 +23,7 @@ int main() {
         
         size_t size_bytes = size_kb * 1024;
         
-        // 1. Allocate memory that is EXECUTABLE (PROT_EXEC)
-        // This allows us to run the array as if it were a function
+        // allocate memory for instructions
         void *code_mem = mmap(NULL, size_bytes, 
                               PROT_READ | PROT_WRITE | PROT_EXEC, 
                               MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -34,16 +33,14 @@ int main() {
             return 1;
         }
 
-        // 2. Fill the memory with NOPs (No-Operations)
+        // fill it up with NOPs
         memset(code_mem, NOP, size_bytes);
         
-        // 3. Make the last byte a RETURN instruction
-        // This turns the array into a valid void function()
+        // last instr is a return statement
         unsigned char *p = (unsigned char *)code_mem;
         p[size_bytes - 1] = RET;
 
-        // 4. Run the test
-        // Cast the memory pointer to a function pointer
+        // run
         void (*func_ptr)() = (void (*)())code_mem;
         
         struct timespec start, end;
@@ -57,7 +54,7 @@ int main() {
         
         clock_gettime(CLOCK_MONOTONIC, &end);
 
-        // 5. Cleanup
+        // cleaning
         munmap(code_mem, size_bytes);
 
         // Calculate time per iteration

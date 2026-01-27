@@ -4,13 +4,11 @@
 #include <stdint.h>
 #include <string.h>
 
-// We test up to 32 ways. 
-// (L1 is usually 8 or 12, L2 is 10-16, L3 is 12-16, so 32 is safe)
-#define MAX_WAYS 32 
-#define ACCESSES 1000000 // Enough loops to get a stable average
+#define MAX_WAYS 32 // max ways to test is 32 ways
+#define ACCESSES 1000000
 
 int main(int argc, char *argv[]) {
-    // 1. Read the Stride from the command line
+    // read the stride or the input
     if (argc != 2) {
         printf("Usage: ./probe_assoc <stride_in_bytes>\n");
         return 1;
@@ -23,7 +21,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // 2. Allocate memory: Enough for the maximum number of ways we want to test
+    // allocate memory for testing
     size_t mem_size = (size_t)MAX_WAYS * STRIDE;
     char *memory = (char*)malloc(mem_size);
     if (!memory) {
@@ -31,15 +29,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    // Warmup: Write to memory to ensure pages are physically allocated
+    // write to the entire space
     memset(memory, 1, mem_size);
 
     printf("Probing Associativity with Stride = %d bytes\n", STRIDE);
     printf("Ways\tAvg_Time(ns)\n");
     printf("--------------------\n");
 
-    // 3. The Main Experiment Loop
-    // We try chains of length 1, then 2, then 3... up to MAX_WAYS
+    // looping throuhg each way
     for (int ways = 1; ways <= MAX_WAYS; ways++) {
         
         // --- Setup the Pointer Chain ---

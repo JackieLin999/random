@@ -1,27 +1,28 @@
+// true_cache_size_grab.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <stdint.h>
 
-// Adjust these based on your suspected CPU limits
-#define MIN_SIZE (1024)              // 1 KB
-#define MAX_SIZE (64 * 1024 * 1024)   // 64 MB
-#define ITERATIONS 100000000         // Total accesses per test
+#define MIN_SIZE (1024)              // the smallest size to test
+#define MAX_SIZE (64 * 1024 * 1024)   // 64 MB, guarantee to be bigger than all of the cache combine
+#define ITERATIONS 100000000         // total access
 
+// tests memory latency for a buffer of size bytes.
 void test_size(size_t size) {
+
+    //number of pointers that fit in size
     size_t count = size / sizeof(void*);
+    // allocate the memory
     void **buffer = (void **)malloc(size);
     if (!buffer) return;
 
-    // Initialize the buffer with a "shuffled" pointer chain
-    // This creates a cyclic path through the entire buffer
+    // cyclic memory pointer
     for (size_t i = 0; i < count; i++) {
         buffer[i] = (void *)&buffer[(i + 1) % count];
     }
 
-    // Optional: For better results, use a non-linear stride or 
-    // a pseudo-random shuffle to further defeat prefetchers.
-    size_t stride = 128 / sizeof(void*); // Larger than a cache line
+    size_t stride = 128 / sizeof(void*);
     for (size_t i = 0; i < count; i++) {
         buffer[i] = (void *)&buffer[(i + stride) % count];
     }
