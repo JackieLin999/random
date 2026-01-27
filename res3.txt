@@ -1,4 +1,4 @@
-Probing L1 cache associativity (48 KB, 64 B line size)...
+Probing L3 cache associativity (9216 KB, 64 B line size)...
 Ways = 1, Access time = 6503310 cycles
 Ways = 2, Access time = 7557058 cycles
 Ways = 3, Access time = 6779588 cycles
@@ -8,7 +8,7 @@ Ways = 6, Access time = 12524640 cycles
 Ways = 7, Access time = 14380054 cycles
 Ways = 8, Access time = 25549740 cycles
 Ways = 9, Access time = 30420152 cycles
-Ways = 10, Access time = 34437942 cycles
+Ways = 10, Access time = 34437942 cycles <-- 10 ways, knee start bending here
 Ways = 11, Access time = 37211588 cycles
 Ways = 12, Access time = 43443622 cycles
 Ways = 13, Access time = 45238910 cycles
