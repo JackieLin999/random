@@ -16,7 +16,7 @@ Code_Size(KB)	Avg_Time(ns)
 26		2104.3984
 28		2865.8044
 30		2482.8985
-32		2753.4270
+32		2753.4270 <--- i cahce L1 size, the knee starts bending here, note 1k ns jump
 34		3763.6740
 36		3554.7671
 38		3309.3821

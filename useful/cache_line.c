@@ -1,21 +1,24 @@
+// cache_line.c
+// for finding the cache_line
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <stdint.h>
 #include <string.h>
 
+// we will create a large region of memory. 64 MB is bigger and all cache combined
 #define ARRAY_SIZE_BYTES (64 * 1024 * 1024) // 64 MB
 #define NUM_ACCESSES 10000000 // Number of hops to measure
 
 int main() {
-    // Allocate memory
+    // allocate memory
     char *memory = (char*)malloc(ARRAY_SIZE_BYTES);
     if (!memory) return 1;
 
     // Fill with junk to force physical allocation
     memset(memory, 1, ARRAY_SIZE_BYTES);
 
-    // We use void** to treat the memory as a chain of pointers
+    // use void** to treat the memory as a chain of pointers
     void **head;
     
     printf("Stride(B)\tAvg_Time(ns)\n");
@@ -24,13 +27,13 @@ int main() {
     // Test strides from 16 up to 512
     for (int stride = 16; stride <= 512; stride *= 2) {
         
-        // 1. SETUP THE POINTER CHAIN
-        // We manually link memory[i] to point to memory[i+stride]
+        // manually link memory[i] to point to memory[i+stride]
         for (int i = 0; i < ARRAY_SIZE_BYTES - stride; i += stride) {
             // The value at 'memory + i' is the address of 'memory + i + stride'
             *(void**)(&memory[i]) = (void*)(&memory[i + stride]);
         }
-        // Close the loop (circular) so we don't crash
+
+        // Close the loop
         *(void**)(&memory[ARRAY_SIZE_BYTES - stride]) = (void*)(&memory[0]);
 
         head = (void**)memory; // Start at beginning
@@ -39,11 +42,10 @@ int main() {
         void **p = head;
         for(int k=0; k<1000; k++) p = (void**)*p;
 
-        // 2. MEASURE LATENCY
+        // measure
         struct timespec start, end;
         clock_gettime(CLOCK_MONOTONIC, &start);
 
-        // CRITICAL LOOP: Pointer Chasing
         // The CPU cannot predict 'p' until it reads '*p'.
         // This forces serialization and exposes true latency.
         p = head;
