@@ -6,11 +6,11 @@ Ways = 4, Access time = 9040866 cycles
 Ways = 5, Access time = 10977810 cycles
 Ways = 6, Access time = 12486762 cycles
 Ways = 7, Access time = 14525532 cycles
-Ways = 8, Access time = 25757400 cycles
+Ways = 8, Access time = 25757400 cycles 
 Ways = 9, Access time = 29915502 cycles
-Ways = 10, Access time = 33785536 cycles
+Ways = 10, Access time = 33785536 cycles <-- 12-ways knee start bending here
 Ways = 11, Access time = 37574906 cycles
-Ways = 12, Access time = 42513074 cycles
+Ways = 12, Access time = 42513074 cycles 
 Ways = 13, Access time = 48408620 cycles
 Ways = 14, Access time = 50236404 cycles
 Ways = 15, Access time = 52968458 cycles

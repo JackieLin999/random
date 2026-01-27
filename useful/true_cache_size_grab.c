@@ -1,4 +1,5 @@
 // true_cache_size_grab.c
+// increasing the buffer and check latency. This is for probing the cache size
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

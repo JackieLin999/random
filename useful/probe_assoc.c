@@ -1,3 +1,5 @@
+// probe_assoc.c
+// takes in an estimated cache size and test it with different stride size by force feeding a different associtivity each time
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
